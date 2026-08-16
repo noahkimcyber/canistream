@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5158783603229526" crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Streaming Gear — CanIStream</title>
+<meta name="description" content="The actual PC, capture, audio, video, and peripheral setup behind CanIStream — what I run, and why.">
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
+  .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 18px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 12px; }
+  .subtitle { color: var(--muted); font-size: 0.92rem; line-height: 1.7; margin: 0 0 32px; }
+  h2.section-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 32px 0 12px; }
+  .gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .gear-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .gear-card .cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); margin-bottom: 4px; }
+  .gear-card .model { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .gear-card .desc { font-size: 0.86rem; line-height: 1.55; color: var(--text); margin-bottom: 12px; }
+  .gear-card .gear-link { font-size: 0.78rem; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+  .affiliate-disclosure { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 36px; line-height: 1.6; }
+  .footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 32px 16px; border-top: 1px solid var(--border); margin-top: 24px; }
+  .footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="site-nav">
+  <a href="index.html" class="site-nav-brand">CanIStream</a>
+  <div class="site-nav-links">
+    <a href="stream-settings-calculator.html">Settings</a>
+    <a href="pc-streaming-check.html">PC Check</a>
+    <a href="storage-calculator.html">Storage</a>
+    <a href="audio-settings-helper.html">Audio</a>
+    <a href="platform-comparison.html">Platforms</a>
+    <a href="my-gear.html">My Gear</a>
+    <a href="about.html">About</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1>My Streaming Gear</h1>
+  <p class="subtitle">
+    This is the actual setup I stream on — not a "best of" list, just what I personally use and why
+    I picked it. If you're putting a setup together and want a second opinion on any of it, this is
+    the honest version rather than a sponsored one.
+  </p>
+
+  <h2 class="section-title">PC & Capture</h2>
+  <div class="gear-grid">
+    <div class="gear-card">
+      <div class="cat">Graphics card</div>
+      <div class="model">Nvidia RTX 2070 Super</div>
+      <div class="desc">Older card at this point, but its NVENC hardware encoder still does the heavy lifting for stream encoding without touching game framerate — that's the part that actually matters for streaming, more than raw gaming horsepower. It's held up longer than I expected.</div>
+      <a class="gear-link" href="https://www.amazon.com/s?k=RTX+2070+Super+graphics+card&tag=canistream0d-20" target="_blank" rel="nofollow sponsored noopener">See similar on Amazon →</a>
+    </div>
+    <div class="gear-card">
+      <div class="cat">CPU</div>
+      <div class="model">AMD Ryzen 9 5900X (12-core)</div>
+      <div class="desc">Way more cores than streaming alone needs, but it means OBS, a browser, Discord, and the game itself never fight each other for CPU time. If you're building new today you could get away with less unless you're also doing heavy video editing on the side.</div>
+      <a class="gear-link" href="https://www.amazon.com/s?k=AMD+Ryzen+9+5900X&tag=canistream0d-20" target="_blank" rel="nofollow sponsored noopener">See similar on Amazon →</a>
+    </div>
+    <div class="gear-card">
+      <div class="cat">Capture card</div>
+      <div class="model">Elgato HD60 Pro</div>
+      <div class="desc">Internal PCIe capture card — handy if you ever want to pull in a console or a second PC's feed without adding external boxes to the desk. Plug-and-play in OBS, never given me driver trouble.</div>
+      <a class="gear-link" href="https://www.amazon.com/s?k=Elgato+HD60+Pro+capture+card&tag=canistream0d-20" target="_blank" rel="nofollow sponsored noopener">See similar on Amazon →</a>
+    </div>
+  </div>
+
+  <h2 class="section-title">Audio & Video</h2>
+  <div class="gear-grid">
+    <div class="gear-card">
+      <div class="cat">Microphone</div>
+      <div class="model">Fifine AM8</div>
+      <div class="desc">Budget XLR/USB dynamic mic — the dynamic capsule rejects a lot of room noise and keyboard clatter compared to a cheap condenser, which matters more than raw fidelity if you're not in a treated room. Good starting point before spending real money on audio.</div>
+      <a class="gear-link" href="https://www.amazon.com/s?k=Fifine+AM8+microphone&tag=canistream0d-20" target="_blank" rel="nofollow sponsored noopener">See similar on Amazon →</a>
+    </div>
+    <div class="gear-card">
+      <div class="cat">Camera</div>
+      <div class="model">Elgato Facecam Neo</div>
+      <div class="desc">I don't use this exact one myself, but it's the webcam I'd point someone to if they just want a solid, no-fuss 1080p picture without overpaying — plug-and-play, decent low-light handling for the price, and it's a natural pairing if you're already in Elgato's ecosystem via the capture card.</div>
+      <a class="gear-link" href="https://www.amazon.com/s?k=Elgato+Facecam+Neo&tag=canistream0d-20" target="_blank" rel="nofollow sponsored noopener">See it on Amazon →</a>
+    </div>
+  </div>
+
+  <h2 class="section-title">Peripherals</h2>
+  <div class="gear-grid">
+    <div class="gear-card">
+      <div class="cat">Mouse</div>
+      <div class="model">Logitech G Pro Superlight</div>
+      <div class="desc">Genuinely as light as it gets for a wireless gaming mouse, which matters more than it sounds like it should during long sessions. Battery life is solid enough that charging isn't a mid-stream thought.</div>
+      <a class="gear-link" href="https://www.amazon.com/s?k=Logitech+G+Pro+Superlight&tag=canistream0d-20" target="_blank" rel="nofollow sponsored noopener">See similar on Amazon →</a>
+    </div>
+    <div class="gear-card">
+      <div class="cat">Keyboard</div>
+      <div class="model">Razer BlackWidow V3 Tenkeyless</div>
+      <div class="desc">Tenkeyless (no number pad) frees up desk space for mouse movement, which is the main reason I'd point anyone toward a TKL board over full-size. Mechanical switches feel good on stream and hold up to daily use.</div>
+      <a class="gear-link" href="https://www.amazon.com/s?k=Razer+BlackWidow+V3+Tenkeyless&tag=canistream0d-20" target="_blank" rel="nofollow sponsored noopener">See similar on Amazon →</a>
+    </div>
+  </div>
+
+  <p class="affiliate-disclosure">
+    As an Amazon Associate, this site earns from qualifying purchases. Links go to Amazon search
+    results for the exact or closest-matching product rather than a single listing, since specific
+    listings change over time — everything above is genuinely what I use (or, where noted, what I'd
+    recommend) rather than a paid placement.
+  </p>
+</div>
+
+<div class="footer">
+  <a href="index.html">Home</a> &middot; <a href="privacy.html">Privacy Policy</a>
+</div>
+</body>
+</html>
