@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Can My PC Handle Streaming? (Prototype)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+    --warn: #f5a623;
+    --warn-soft: rgba(245,166,35,0.12);
+    --good: #4cc38a;
+    --good-soft: rgba(76,195,138,0.12);
+    --bad: #ff6b6b;
+    --bad-soft: rgba(255,107,107,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0 0 28px; line-height: 1.5; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 18px;
+    font-weight: 600;
+  }
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--text); }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  input[type="number"], select {
+    width: 100%;
+    background: #0f1115;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  input[type="number"]:focus, select:focus { outline: none; border-color: var(--accent); }
+  .row { display: flex; gap: 12px; }
+  .row .field { flex: 1; }
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-option {
+    flex: 1;
+    min-width: 130px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  .radio-option .sub { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .radio-option.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .radio-option.selected .sub { color: var(--accent); opacity: 0.8; }
+  button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #0f1115;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  button:hover { opacity: 0.9; }
+  #results { display: none; }
+  .verdict-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .verdict-badge.good { background: var(--good-soft); color: var(--good); }
+  .verdict-badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .verdict-badge.bad { background: var(--bad-soft); color: var(--bad); }
+  .notes {
+    background: var(--accent-soft);
+    border: 1px solid rgba(110,168,254,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .notes.warn { background: var(--warn-soft); border-color: rgba(245,166,35,0.3); }
+  .notes.bad { background: var(--bad-soft); border-color: rgba(255,107,107,0.3); }
+  .notes ul.simple-list { margin: 0 0 10px; padding-left: 18px; }
+  .notes ul.simple-list li { margin-bottom: 4px; }
+  details { font-size: 0.8rem; color: var(--muted); }
+  details summary { cursor: pointer; color: var(--accent); font-size: 0.8rem; padding: 2px 0; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: "+ "; }
+  details[open] summary::before { content: "\2013 "; }
+  details .detail-body { margin-top: 10px; line-height: 1.6; }
+  .notes .detail-body ul { margin: 6px 0 0; padding-left: 18px; }
+  .notes .detail-body li { margin-bottom: 4px; }
+  .detect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .detect-tile { background: #0f1115; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .detect-tile .label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .detect-tile .value { font-size: 0.9rem; font-weight: 600; word-break: break-word; }
+  .detect-tile .raw { font-size: 0.72rem; color: var(--muted); margin-top: 3px; word-break: break-word; }
+  .gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
+  .gear-card {
+    background: #0f1115;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .gear-card .cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 6px; }
+  .gear-card .desc { font-size: 0.82rem; line-height: 1.5; margin-bottom: 8px; }
+  .gear-card .placeholder-link {
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--accent);
+  }
+  .field-error { color: var(--bad); font-size: 0.78rem; margin-top: 6px; display: none; }
+  .field-error.show { display: block; }
+  .input-error { border-color: var(--bad) !important; }
+  .footer-note { color: var(--muted); font-size: 0.78rem; text-align: center; margin-top: 28px; line-height: 1.6; }
+  .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-nav">
+    <a href="index.html" class="site-nav-brand">CanIStream</a>
+    <div class="site-nav-links">
+      <a href="stream-settings-calculator.html">Settings</a>
+      <a href="pc-streaming-check.html">PC Check</a>
+      <a href="storage-calculator.html">Storage</a>
+      <a href="audio-settings-helper.html">Audio</a>
+      <a href="platform-comparison.html">Platforms</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <h1>Can My PC Handle Streaming?</h1>
+  <p class="subtitle">
+    Tell it what you want to stream at and it'll tell you if your computer can handle
+    gaming and streaming at the same time — or whether you need a capture card,
+    a second PC, or an upgrade. Everything runs in your browser; nothing is sent anywhere.
+  </p>
+
+  <div class="card">
+    <h2>What we found on your computer</h2>
+    <div class="detect-grid">
+      <div class="detect-tile">
+        <div class="label">Graphics card</div>
+        <div class="value" id="detGpu">Detecting…</div>
+        <div class="raw" id="detGpuRaw"></div>
+      </div>
+      <div class="detect-tile">
+        <div class="label">CPU cores</div>
+        <div class="value" id="detCores">Detecting…</div>
+      </div>
+    </div>
+    <details>
+      <summary>Why this might be wrong</summary>
+      <div class="detail-body">
+        This is a best guess from your browser, not a direct read of your hardware — double-check it
+        below and fix anything that looks off, especially in Firefox or Safari, which hide some of
+        this on purpose.
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>How you plan to stream</h2>
+    <div class="field">
+      <label>Are you gaming and streaming on the same computer, or using a second PC / capture card?</label>
+      <div class="radio-group" id="setupGroup">
+        <div class="radio-option selected" data-value="single">
+          One computer
+          <span class="sub">game + stream together</span>
+        </div>
+        <div class="radio-option" data-value="dual">
+          Two PCs / capture card
+          <span class="sub">a second device handles the stream</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What you want to stream at</h2>
+    <div class="field">
+      <label for="resTarget">Target resolution and frame rate</label>
+      <select id="resTarget">
+        <option value="720p30">720p, 30fps</option>
+        <option value="1080p30">1080p, 30fps</option>
+        <option value="1080p60" selected>1080p, 60fps</option>
+        <option value="1440p60">1440p, 60fps</option>
+        <option value="4k30">4K, 30fps</option>
+        <option value="4k60">4K, 60fps</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>How demanding is the game</h2>
+    <div class="field">
+      <label>Pick the closest match</label>
+      <div class="radio-group" id="intensityGroup">
+        <div class="radio-option" data-value="light">
+          Light
+          <span class="sub">indie, turn-based, Minecraft</span>
+        </div>
+        <div class="radio-option selected" data-value="medium">
+          Medium
+          <span class="sub">most shooters, average settings</span>
+        </div>
+        <div class="radio-option" data-value="heavy">
+          Heavy
+          <span class="sub">maxed settings, ray tracing, VR</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your computer</h2>
+    <div class="field">
+      <label for="gpu">Graphics card</label>
+      <select id="gpu">
+        <option value="nvidia">Nvidia (GTX 10-series or newer)</option>
+        <option value="amd">AMD (RX 400-series or newer)</option>
+        <option value="intel">Intel Arc / recent Intel iGPU</option>
+        <option value="none">Older / integrated / not sure</option>
+      </select>
+      <div class="hint">Already filled in from what we detected above — change it if it's wrong.</div>
+    </div>
+    <div class="field">
+      <label for="cores">CPU cores</label>
+      <input type="number" id="cores" placeholder="e.g. 8" min="1" step="1">
+      <div class="hint">Also pre-filled from detection. Check Task Manager (Performance tab) or your CPU's spec sheet if you're not sure.</div>
+      <div class="field-error" id="coresError">Enter your CPU's core count before continuing.</div>
+    </div>
+  </div>
+
+  <button id="checkBtn">Check my setup</button>
+
+  <div id="results">
+    <div class="card">
+      <h2>Your result</h2>
+      <div id="verdictBadge" class="verdict-badge good">–</div>
+      <div class="notes" id="outNotes"></div>
+      <div id="gearSection" style="display:none;">
+        <div class="hint" style="margin-top:16px; margin-bottom: 0;">If you want more headroom, here's what usually helps:</div>
+        <div class="gear-grid" id="gearGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    This is a rule-of-thumb estimate based on common streaming hardware guides, not a guarantee —
+    real performance depends on your exact game, in-game settings, and everything else running on
+    your PC. Treat it as a starting point, then watch OBS's Stats window while live to confirm.
+  </p>
+</div>
+
+<script>
+  // ---- Auto-detection: same approach as the settings calculator ----
+  function detectGPU() {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return { raw: null, guess: 'none' };
+      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      const raw = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+      const lower = (raw || '').toLowerCase();
+      let guess = 'none';
+      if (/nvidia|geforce|rtx|gtx/.test(lower)) guess = 'nvidia';
+      else if (/amd|radeon/.test(lower)) guess = 'amd';
+      else if (/intel/.test(lower)) guess = 'intel';
+      return { raw: raw || 'Not exposed by this browser', guess };
+    } catch (e) {
+      return { raw: 'Detection failed', guess: 'none' };
+    }
+  }
+
+  function detectCores() {
+    return navigator.hardwareConcurrency || null;
+  }
+
+  function runAutoDetect() {
+    const gpu = detectGPU();
+    document.getElementById('detGpu').textContent =
+      gpu.guess === 'none' ? 'Not confidently detected' : gpu.guess.toUpperCase();
+    document.getElementById('detGpuRaw').textContent = gpu.raw || '';
+    document.getElementById('gpu').value = gpu.guess;
+
+    const cores = detectCores();
+    document.getElementById('detCores').textContent = cores ? `${cores} threads` : 'Not reported';
+    if (cores) document.getElementById('cores').value = cores;
+  }
+
+  document.addEventListener('DOMContentLoaded', runAutoDetect);
+
+  // Single-select radio groups
+  document.querySelectorAll('.radio-group').forEach(group => {
+    group.addEventListener('click', (e) => {
+      const opt = e.target.closest('.radio-option');
+      if (!opt) return;
+      group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  function getSelected(groupId) {
+    return document.querySelector(`#${groupId} .radio-option.selected`).dataset.value;
+  }
+
+  function setFieldError(inputEl, errorEl, hasError) {
+    errorEl.classList.toggle('show', hasError);
+    if (inputEl) inputEl.classList.toggle('input-error', hasError);
+  }
+
+  document.getElementById('cores').addEventListener('input', () => {
+    setFieldError(document.getElementById('cores'), document.getElementById('coresError'), false);
+  });
+
+  // Encode "demand" per target resolution/fps — rough proxy for how much work
+  // the encoder (hardware or CPU) has to do, matching the tiers used in the
+  // settings calculator.
+  const RES_DEMAND = {
+    '720p30': 1,
+    '1080p30': 2,
+    '1080p60': 3,
+    '1440p60': 4,
+    '4k30': 4,
+    '4k60': 5,
+  };
+  const RES_LABELS = {
+    '720p30': '720p/30fps',
+    '1080p30': '1080p/30fps',
+    '1080p60': '1080p/60fps',
+    '1440p60': '1440p/60fps',
+    '4k30': '4K/30fps',
+    '4k60': '4K/60fps',
+  };
+  const INTENSITY_SCORE = { light: 1, medium: 2, heavy: 3 };
+  const INTENSITY_LABELS = { light: 'a light game', medium: 'a medium-demand game', heavy: 'a heavy/demanding game' };
+
+  const GEAR_CATALOG = {
+    captureCard: {
+      cat: 'Capture card',
+      desc: 'Lets a second PC receive your gaming PC\'s video feed and do all the encoding, taking the load off your main machine entirely.',
+    },
+    gpuUpgrade: {
+      cat: 'GPU with a hardware encoder',
+      desc: 'A newer Nvidia, AMD, or Intel card with NVENC/AMF/Quick Sync handles encoding mostly independently of your game, freeing up real headroom.',
+    },
+    secondPC: {
+      cat: 'A modest second PC',
+      desc: 'Doesn\'t need to be powerful — just enough to run OBS and push the stream, while your main PC focuses entirely on the game.',
+    },
+  };
+
+  function gearCardHtml(key) {
+    const g = GEAR_CATALOG[key];
+    // Placeholder — swap this href/text for a real affiliate link before publishing.
+    return `
+      <div class="gear-card">
+        <div class="cat">${g.cat}</div>
+        <div class="desc">${g.desc}</div>
+        <a class="placeholder-link" href="#" data-gear="${key}">See recommended picks (add affiliate link)</a>
+      </div>
+    `;
+  }
+
+  document.getElementById('checkBtn').addEventListener('click', () => {
+    const coresInput = document.getElementById('cores');
+    const cores = parseInt(coresInput.value, 10);
+    const coresMissing = !cores || cores <= 0;
+    setFieldError(coresInput, document.getElementById('coresError'), coresMissing);
+    if (coresMissing) {
+      coresInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const setup = getSelected('setupGroup'); // 'single' | 'dual'
+    const resTarget = document.getElementById('resTarget').value;
+    const intensity = getSelected('intensityGroup');
+    const gpu = document.getElementById('gpu').value;
+    const hasHW = gpu !== 'none';
+
+    const resDemand = RES_DEMAND[resTarget];
+    const intensityScore = INTENSITY_SCORE[intensity];
+    const totalDemand = resDemand + intensityScore; // range 2-8
+
+    let tier, verdictText, reasonBullets, gearKeys, coresNote;
+
+    if (setup === 'dual') {
+      // Encoding happens on a second device — the main PC's job is just running the game.
+      tier = 'good';
+      verdictText = 'Comfortable';
+      reasonBullets = [
+        `With a second PC or capture card handling the stream, your main computer only has to run the game — encoding isn't competing with it at all.`,
+        resDemand >= 5
+          ? `One thing to double check: capturing ${RES_LABELS[resTarget]} needs a capture card that supports it — most budget cards top out around 1080p60 or 4K30, and 4K60 capture specifically needs HDMI 2.1 support.`
+          : `A typical capture card handles ${RES_LABELS[resTarget]} without issue.`,
+      ];
+      gearKeys = resDemand >= 5 ? ['captureCard'] : [];
+      coresNote = null;
+    } else {
+      // Single PC: game and encoding share the same hardware.
+      if (hasHW) {
+        // Hardware encoder present — mostly independent of the game, but still needs
+        // enough CPU threads for OS + game + OBS overhead, and enough headroom at the
+        // most demanding resolutions.
+        if (totalDemand <= 5 && cores >= 6) {
+          tier = 'good';
+          verdictText = 'Comfortable';
+        } else if (totalDemand <= 7 && cores >= 4) {
+          tier = 'warn';
+          verdictText = 'Borderline';
+        } else {
+          tier = 'bad';
+          verdictText = 'Likely to struggle';
+        }
+        reasonBullets = [
+          `Your graphics card has its own hardware encoder, so streaming doesn't have to compete much with ${INTENSITY_LABELS[intensity]} for power.`,
+        ];
+        if (cores < 6) {
+          reasonBullets.push(`Your CPU core count (${cores}) is on the lower side — even with a hardware encoder, your processor still handles the game, OBS, and everything else in the background, so this can still bottleneck.`);
+        }
+        if (tier !== 'good') {
+          reasonBullets.push(`${RES_LABELS[resTarget]} with ${INTENSITY_LABELS[intensity]} is a demanding combination to ask of one machine, hardware encoder or not.`);
+        }
+      } else {
+        // No hardware encoder — x264 competes directly with the game for CPU time.
+        if (totalDemand <= 3 && cores >= 6) {
+          tier = 'good';
+          verdictText = 'Comfortable';
+        } else if (totalDemand <= 5 && cores >= 8) {
+          tier = 'warn';
+          verdictText = 'Borderline';
+        } else {
+          tier = 'bad';
+          verdictText = 'Likely to struggle';
+        }
+        reasonBullets = [
+          `No hardware encoder was found, so your processor has to run both the game and the encoding (x264) at the same time — this is the most demanding combination for a single PC.`,
+        ];
+        if (tier !== 'good') {
+          reasonBullets.push(`${RES_LABELS[resTarget]} with ${INTENSITY_LABELS[intensity]} on CPU encoding alone will likely cause dropped frames or a choppy game, or both.`);
+        }
+      }
+
+      if (tier === 'good') {
+        gearKeys = [];
+      } else if (tier === 'warn') {
+        gearKeys = hasHW ? [] : ['gpuUpgrade'];
+      } else {
+        gearKeys = hasHW ? ['captureCard', 'secondPC'] : ['gpuUpgrade', 'captureCard'];
+      }
+    }
+
+    // Render
+    const badge = document.getElementById('verdictBadge');
+    badge.className = `verdict-badge ${tier}`;
+    badge.textContent = verdictText;
+
+    const notesEl = document.getElementById('outNotes');
+    notesEl.className = `notes ${tier === 'good' ? '' : tier}`.trim();
+    let listHtml = reasonBullets.map(b => `<li>${b}</li>`).join('');
+    notesEl.innerHTML = `<ul class="simple-list">${listHtml}</ul>`;
+
+    const gearSection = document.getElementById('gearSection');
+    const gearGrid = document.getElementById('gearGrid');
+    if (gearKeys && gearKeys.length) {
+      gearGrid.innerHTML = gearKeys.map(gearCardHtml).join('');
+      gearSection.style.display = 'block';
+    } else {
+      gearGrid.innerHTML = '';
+      gearSection.style.display = 'none';
+    }
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+</script>
+</body>
+</html>

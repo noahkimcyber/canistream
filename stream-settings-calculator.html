@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stream Settings Calculator (Prototype)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+    --warn: #f5a623;
+    --warn-soft: rgba(245,166,35,0.12);
+    --good: #4cc38a;
+    --good-soft: rgba(76,195,138,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0 0 28px; line-height: 1.5; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin: 0 0 18px;
+    font-weight: 600;
+  }
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  input[type="number"], select {
+    width: 100%;
+    background: #0f1115;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .row { display: flex; gap: 12px; }
+  .row .field { flex: 1; }
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-option {
+    flex: 1;
+    min-width: 130px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  .radio-option.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #0f1115;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  button:hover { opacity: 0.9; }
+  #results { display: none; }
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .result-tile {
+    background: #0f1115;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .result-tile .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .result-tile .value {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+  .notes {
+    background: var(--accent-soft);
+    border: 1px solid rgba(110,168,254,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .notes.warn { background: var(--warn-soft); border-color: rgba(245,166,35,0.3); }
+  .notes ul { margin: 8px 0 0; padding-left: 18px; }
+  .notes li { margin-bottom: 4px; }
+  .footer-note {
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-align: center;
+    margin-top: 28px;
+    line-height: 1.6;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 5px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge.auto { background: var(--good-soft); color: var(--good); }
+  .badge.manual { background: var(--warn-soft); color: var(--warn); }
+  .detect-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .detect-tile {
+    background: #0f1115;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .detect-tile .label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .detect-tile .value { font-size: 0.9rem; font-weight: 600; word-break: break-word; }
+  .detect-tile .raw { font-size: 0.72rem; color: var(--muted); margin-top: 3px; word-break: break-word; }
+  .limits-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+    background: #0f1115;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .limits-note strong { color: var(--text); }
+  .sub-options {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  details { font-size: 0.8rem; color: var(--muted); }
+  details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 0.8rem;
+    padding: 2px 0;
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: "+ "; }
+  details[open] summary::before { content: "– "; }
+  details .detail-body { margin-top: 10px; line-height: 1.6; }
+  .notes .detail-body ul { margin: 6px 0 0; padding-left: 18px; }
+  .notes .detail-body li { margin-bottom: 4px; }
+  .notes > p { margin: 0 0 8px; }
+  .notes ul.simple-list { margin: 0 0 10px; padding-left: 18px; }
+  .notes ul.simple-list li { margin-bottom: 4px; }
+  .field-error {
+    color: #ff6b6b;
+    font-size: 0.78rem;
+    margin-top: 6px;
+    display: none;
+  }
+  .field-error.show { display: block; }
+  .input-error { border-color: #ff6b6b !important; }
+  .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-nav">
+    <a href="index.html" class="site-nav-brand">CanIStream</a>
+    <div class="site-nav-links">
+      <a href="stream-settings-calculator.html">Settings</a>
+      <a href="pc-streaming-check.html">PC Check</a>
+      <a href="storage-calculator.html">Storage</a>
+      <a href="audio-settings-helper.html">Audio</a>
+      <a href="platform-comparison.html">Platforms</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <h1>Stream Settings Calculator</h1>
+  <p class="subtitle">
+    Answer a few quick questions and get the exact settings to plug into OBS —
+    resolution, frame rate, bitrate, and encoder. Everything happens right here
+    in your browser; nothing is sent anywhere.
+  </p>
+
+  <div class="card">
+    <h2>What we found on your computer</h2>
+    <div class="detect-grid">
+      <div class="detect-tile">
+        <div class="label">Graphics card</div>
+        <div class="value" id="detGpu">Detecting…</div>
+        <div class="raw" id="detGpuRaw"></div>
+      </div>
+      <div class="detect-tile">
+        <div class="label">CPU cores</div>
+        <div class="value" id="detCores">Detecting…</div>
+      </div>
+      <div class="detect-tile">
+        <div class="label">Memory (approx)</div>
+        <div class="value" id="detRam">Detecting…</div>
+      </div>
+      <div class="detect-tile">
+        <div class="label">Operating system</div>
+        <div class="value" id="detOs">Detecting…</div>
+      </div>
+    </div>
+    <details>
+      <summary>Why this might be wrong</summary>
+      <div class="detail-body">
+        This is a best guess, not a direct read of your hardware, so double-check it below and fix
+        anything that looks off (especially in Firefox or Safari, which hide some of this on purpose).
+        We also can't detect your upload speed this way — you'll need to enter that yourself below.
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Your internet speed</h2>
+    <div class="row">
+      <div class="field">
+        <label for="upload">Upload speed</label>
+        <input type="number" id="upload" placeholder="e.g. 25" min="0" step="0.1">
+      </div>
+      <div class="field">
+        <label for="uploadUnit">Unit</label>
+        <select id="uploadUnit">
+          <option value="mbps" selected>Mbps</option>
+          <option value="kbps">Kbps</option>
+        </select>
+      </div>
+    </div>
+    <div class="hint">
+      Go to fast.com or speedtest.net and use the <strong>upload</strong> number — not download.
+    </div>
+    <div class="field-error" id="uploadError">Enter your upload speed before continuing.</div>
+  </div>
+
+  <div class="card">
+    <h2>Where you stream</h2>
+    <div class="field">
+      <label for="platform">Main platform</label>
+      <select id="platform">
+        <option value="twitch">Twitch</option>
+        <option value="youtube">YouTube</option>
+        <option value="tiktok">TikTok</option>
+        <option value="kick">Kick</option>
+        <option value="other">Other / custom RTMP (no cap)</option>
+      </select>
+      <div class="hint">Streaming to more than one place? Pick your main one here — add the rest next.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Streaming to more than one place?</h2>
+    <div class="field">
+      <label>Are you live on multiple platforms at the same time?</label>
+      <div class="radio-group" id="multiGroup">
+        <div class="radio-option selected" data-value="no">No, just one</div>
+        <div class="radio-option" data-value="yes">Yes</div>
+      </div>
+    </div>
+    <div class="sub-options" id="multiOptions" style="display:none;">
+      <div class="field">
+        <label>Which other platforms?</label>
+        <div class="chip-group" id="multiPlatforms">
+          <div class="radio-option" data-value="twitch">Twitch</div>
+          <div class="radio-option" data-value="youtube">YouTube</div>
+          <div class="radio-option" data-value="tiktok">TikTok</div>
+          <div class="radio-option" data-value="kick">Kick</div>
+        </div>
+        <div class="field-error" id="multiPlatformsError">Pick at least one other platform, or switch the toggle above back to "No, just one".</div>
+      </div>
+      <div class="field">
+        <label>How are you sending it to all of them?</label>
+        <div class="radio-group" id="howMultiGroup">
+          <div class="radio-option selected" data-value="relay">Using a service (Restream, Streamlabs Multistream, etc.)</div>
+          <div class="radio-option" data-value="direct">Straight from OBS, no service</div>
+        </div>
+        <div class="hint">
+          Most people use a service — you upload once and it copies your stream everywhere, so this
+          barely changes your settings. If you're not using one, your internet has to carry a full
+          copy to each platform at the same time, which usually means lower quality.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What matters more</h2>
+    <div class="field">
+      <label>Pick one</label>
+      <div class="radio-group" id="priorityGroup">
+        <div class="radio-option selected" data-value="smoothness">Smooth 60fps</div>
+        <div class="radio-option" data-value="quality">Higher resolution</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your computer</h2>
+    <div class="field">
+      <label for="gpu">Graphics card</label>
+      <select id="gpu">
+        <option value="nvidia">Nvidia (GTX 10-series or newer)</option>
+        <option value="amd">AMD (RX 400-series or newer)</option>
+        <option value="intel">Intel Arc / recent Intel iGPU</option>
+        <option value="none">Older / integrated / not sure</option>
+      </select>
+      <div class="hint">Already filled in from what we detected above — change it if it's wrong.</div>
+    </div>
+    <div class="field">
+      <label>Is your CPU (processor) also working hard on something else while you stream, like a demanding game?</label>
+      <div class="radio-group" id="cpuGroup">
+        <div class="radio-option selected" data-value="yes">Yes</div>
+        <div class="radio-option" data-value="no">No, it has room to spare</div>
+      </div>
+      <div class="hint">We can't detect this one automatically — you'll need to answer it yourself.</div>
+    </div>
+  </div>
+
+  <details class="card" style="padding: 16px 24px;">
+    <summary>How this tool works (optional reading)</summary>
+    <div class="detail-body">
+      The hardware info above is a best guess from your browser, not a direct read of your PC — it's
+      a real, working shortcut, but not perfect. Your upload speed and whether your CPU is busy can't
+      be detected this way at all, since a browser page can't see your network test results or what
+      else is running on your computer. A more complete version could measure your real upload speed,
+      or connect straight to OBS itself to read your actual current settings — those are bigger builds
+      than this quick version.
+    </div>
+  </details>
+
+  <button id="calcBtn">Get my settings</button>
+
+  <div id="results">
+    <div class="card">
+      <h2>Your OBS settings</h2>
+      <div class="result-grid">
+        <div class="result-tile">
+          <div class="label">Resolution</div>
+          <div class="value" id="outRes">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Frame rate</div>
+          <div class="value" id="outFps">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Video bitrate</div>
+          <div class="value" id="outBitrate">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Encoder</div>
+          <div class="value" id="outEncoder">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Audio bitrate</div>
+          <div class="value" id="outAudio">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Keyframe interval</div>
+          <div class="value" id="outKeyframe">–</div>
+        </div>
+      </div>
+      <div class="notes" id="outNotes"></div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    These are rule-of-thumb estimates based on common OBS/streaming guides, not a guarantee —
+    real-world results depend on your specific network stability, ISP, and scene complexity.
+    Treat this as a starting point, then fine-tune using OBS's built-in stats while live.
+  </p>
+</div>
+
+<script>
+  // ---- Auto-detection: real, client-side, zero-install ----
+  function detectGPU() {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return { raw: null, guess: 'none' };
+      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      const raw = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+      const lower = (raw || '').toLowerCase();
+      let guess = 'none';
+      if (/nvidia|geforce|rtx|gtx/.test(lower)) guess = 'nvidia';
+      else if (/amd|radeon/.test(lower)) guess = 'amd';
+      else if (/intel/.test(lower)) guess = 'intel';
+      return { raw: raw || 'Not exposed by this browser', guess };
+    } catch (e) {
+      return { raw: 'Detection failed', guess: 'none' };
+    }
+  }
+
+  function detectCores() {
+    return navigator.hardwareConcurrency || null;
+  }
+
+  function detectRAM() {
+    // Chromium-only; capped/bucketed by the browser (e.g. reports "8" for anything >=8GB).
+    return navigator.deviceMemory || null;
+  }
+
+  function detectOS() {
+    const ua = navigator.userAgent;
+    if (/Windows/.test(ua)) return 'Windows';
+    if (/Mac OS X/.test(ua)) return 'macOS';
+    if (/Linux/.test(ua)) return 'Linux';
+    return 'Unknown';
+  }
+
+  function runAutoDetect() {
+    const gpu = detectGPU();
+    document.getElementById('detGpu').textContent =
+      gpu.guess === 'none' ? 'Not confidently detected' : gpu.guess.toUpperCase();
+    document.getElementById('detGpuRaw').textContent = gpu.raw || '';
+
+    const cores = detectCores();
+    document.getElementById('detCores').textContent = cores ? `${cores} threads` : 'Not reported';
+
+    const ram = detectRAM();
+    document.getElementById('detRam').textContent = ram ? `${ram} GB+ (browser-capped estimate)` : 'Not reported by this browser';
+
+    document.getElementById('detOs').textContent = detectOS();
+
+    // Pre-fill the Hardware section from what we detected, but leave it fully editable.
+    // Always set explicitly (including 'none') so an unconfident guess doesn't silently
+    // inherit whichever option happens to be first in the dropdown.
+    document.getElementById('gpu').value = gpu.guess;
+  }
+
+  document.addEventListener('DOMContentLoaded', runAutoDetect);
+
+  // Wire up single-select radio-style groups (click clears siblings)
+  document.querySelectorAll('.radio-group').forEach(group => {
+    group.addEventListener('click', (e) => {
+      const opt = e.target.closest('.radio-option');
+      if (!opt) return;
+      group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  // Wire up the multi-select platform chips separately — toggling one should NOT clear the others.
+  document.getElementById('multiPlatforms').addEventListener('click', (e) => {
+    const opt = e.target.closest('.radio-option');
+    if (!opt) return;
+    opt.classList.toggle('selected');
+  });
+
+  // Show/hide the multistream sub-options based on the yes/no toggle
+  document.getElementById('multiGroup').addEventListener('click', (e) => {
+    const opt = e.target.closest('.radio-option');
+    if (!opt) return;
+    document.getElementById('multiOptions').style.display = opt.dataset.value === 'yes' ? 'block' : 'none';
+  });
+
+  function getSelected(groupId) {
+    return document.querySelector(`#${groupId} .radio-option.selected`).dataset.value;
+  }
+
+  function getSelectedMulti(groupId) {
+    return Array.from(document.querySelectorAll(`#${groupId} .radio-option.selected`)).map(el => el.dataset.value);
+  }
+
+  // Resolution/fps candidates with min/ideal video bitrate (kbps), roughly matching
+  // common OBS/Twitch/YouTube streaming guides for x264 "fast"-ish quality.
+  const CANDIDATES = [
+    { res: '1280x720',  label: '720p',  fps: 30, min: 2500, ideal: 4000  },
+    { res: '1280x720',  label: '720p',  fps: 60, min: 3500, ideal: 5000  },
+    { res: '1600x900',  label: '900p',  fps: 30, min: 3500, ideal: 5000  },
+    { res: '1920x1080', label: '1080p', fps: 30, min: 4500, ideal: 6000  },
+    { res: '1920x1080', label: '1080p', fps: 60, min: 6000, ideal: 9000  },
+    { res: '2560x1440', label: '1440p', fps: 60, min: 10000, ideal: 13000 },
+    { res: '3840x2160', label: '4K',    fps: 30, min: 13000, ideal: 18000 },
+    { res: '3840x2160', label: '4K',    fps: 60, min: 20000, ideal: 28000 },
+  ];
+
+  const PLATFORM_CAPS = {
+    twitch: 6000, // Twitch caps both Affiliates and Partners at 6,000 kbps — Partner status does not raise this
+    youtube: 40000, // YouTube officially supports far higher bitrates than the other platforms (up to ~35 Mbps H.264 at 4K60) — effectively uncapped for this tool's candidate range
+    tiktok: 6000, // TikTok doesn't publish an official max like Twitch/YouTube — commonly recommended range is ~4,000-6,000 kbps, treat as approximate
+    kick: 8000, // Kick also requires CBR rate control (not VBR) — worth setting explicitly in OBS
+    other: Infinity,
+  };
+
+  const PLATFORM_LABELS = {
+    twitch: 'Twitch',
+    youtube: 'YouTube',
+    tiktok: 'TikTok',
+    kick: 'Kick',
+    other: 'Other/custom',
+  };
+
+  function setFieldError(inputEl, errorEl, hasError) {
+    errorEl.classList.toggle('show', hasError);
+    if (inputEl) inputEl.classList.toggle('input-error', hasError);
+  }
+
+  // Clear an error as soon as the person fixes it, rather than making them re-submit to find out.
+  document.getElementById('upload').addEventListener('input', () => {
+    setFieldError(document.getElementById('upload'), document.getElementById('uploadError'), false);
+  });
+  document.getElementById('multiPlatforms').addEventListener('click', () => {
+    setFieldError(null, document.getElementById('multiPlatformsError'), false);
+  });
+  document.getElementById('multiGroup').addEventListener('click', () => {
+    setFieldError(null, document.getElementById('multiPlatformsError'), false);
+  });
+
+  document.getElementById('calcBtn').addEventListener('click', () => {
+    const uploadInput = document.getElementById('upload');
+    const uploadRaw = parseFloat(uploadInput.value);
+    const isMultistreaming = getSelected('multiGroup') === 'yes';
+    const extraPlatforms = isMultistreaming ? getSelectedMulti('multiPlatforms') : [];
+
+    // Validate required fields. Everything else has a sensible default already selected,
+    // so these two are the only things that can actually be missing.
+    const uploadMissing = !uploadRaw || uploadRaw <= 0;
+    const multiPlatformsMissing = isMultistreaming && extraPlatforms.length === 0;
+
+    setFieldError(uploadInput, document.getElementById('uploadError'), uploadMissing);
+    setFieldError(null, document.getElementById('multiPlatformsError'), multiPlatformsMissing);
+
+    if (uploadMissing || multiPlatformsMissing) {
+      const firstBadField = uploadMissing ? uploadInput : document.getElementById('multiPlatforms');
+      firstBadField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const unit = document.getElementById('uploadUnit').value;
+    const uploadKbps = unit === 'mbps' ? uploadRaw * 1000 : uploadRaw;
+
+    const platform = document.getElementById('platform').value;
+    const priority = getSelected('priorityGroup');
+    const gpu = document.getElementById('gpu').value;
+    const cpuBusy = getSelected('cpuGroup') === 'yes';
+
+    const howMulti = isMultistreaming ? getSelected('howMultiGroup') : null;
+    // Dedup, primary platform always included and listed first
+    const destinations = isMultistreaming
+      ? Array.from(new Set([platform, ...extraPlatforms]))
+      : [platform];
+
+    // Leave headroom: only use ~70% of measured upload for stream bitrate,
+    // since the rest of your connection still needs to breathe (chat, downloads, latency spikes).
+    const totalAvailable = Math.floor(uploadKbps * 0.7);
+
+    // Relay (single upload, service fans out): your connection only ever carries one stream,
+    // so the full available bandwidth applies — but the bitrate still has to satisfy every
+    // destination, so use the strictest cap among them.
+    // Direct (no relay, OBS pushes to each platform itself): your connection carries one full
+    // stream PER destination simultaneously, so divide the available bandwidth across them.
+    const usingRelay = !isMultistreaming || howMulti === 'relay';
+    const available = usingRelay
+      ? totalAvailable
+      : Math.floor(totalAvailable / destinations.length);
+
+    const cap = Math.min(...destinations.map(p => PLATFORM_CAPS[p]));
+    const videoBitrate = Math.min(available, cap);
+
+    // Filter candidates by stated priority
+    let pool = CANDIDATES;
+    if (priority === 'smoothness') {
+      pool = CANDIDATES.filter(c => c.fps === 60);
+    } else {
+      pool = CANDIDATES.filter(c => c.fps === 30 || c.res === '1280x720');
+    }
+
+    // Pick the richest candidate whose "min" bitrate we can afford; fall back to the lightest option.
+    const affordable = pool.filter(c => c.min <= videoBitrate);
+    const pick = affordable.length ? affordable[affordable.length - 1] : pool[0];
+
+    // Final bitrate: don't exceed the candidate's "ideal" ceiling even if more bandwidth is available,
+    // no need to spend bits you don't need at that resolution/fps.
+    const finalBitrate = Math.min(videoBitrate, pick.ideal);
+    const tooLow = videoBitrate < pick.min;
+
+    // Encoder choice — plain-language name/description for the main view,
+    // full technical name/preset kept for the OBS setting value itself.
+    let encoder, encoderSimple, encoderNote;
+    if (gpu === 'nvidia') {
+      encoder = 'NVENC (H.264)';
+      encoderSimple = 'Your graphics card';
+      encoderNote = 'Use NVENC — your graphics card does the encoding instead of your processor, so your game runs smoother.';
+    } else if (gpu === 'amd') {
+      encoder = 'AMD AMF (H.264)';
+      encoderSimple = 'Your graphics card';
+      encoderNote = 'Use AMF — your graphics card does the encoding instead of your processor, so your game runs smoother.';
+    } else if (gpu === 'intel') {
+      encoder = 'Intel Quick Sync (H.264)';
+      encoderSimple = 'Your graphics card';
+      encoderNote = 'Use Quick Sync — your graphics card does the encoding instead of your processor, so your game runs smoother.';
+    } else {
+      encoder = cpuBusy ? 'x264 — preset "veryfast"' : 'x264 — preset "faster"';
+      encoderSimple = 'Your processor (x264)';
+      encoderNote = cpuBusy
+        ? 'Use x264 on the "veryfast" preset — no graphics card encoder was found, and this is the lightest setting so it won\'t fight your game for power.'
+        : 'Use x264 on the "faster" preset — no graphics card encoder was found, but your processor has some room, so this gets a bit more quality.';
+    }
+
+    const audioBitrate = 160; // kbps, standard stereo streaming default
+    const keyframe = 2; // seconds, matches Twitch/YouTube recommendation
+
+    // Render
+    document.getElementById('outRes').textContent = `${pick.label} (${pick.res})`;
+    document.getElementById('outFps').textContent = `${pick.fps} fps`;
+    document.getElementById('outBitrate').textContent = `${finalBitrate.toLocaleString()} kbps`;
+    document.getElementById('outEncoder').textContent = encoder;
+    document.getElementById('outAudio').textContent = `${audioBitrate} kbps`;
+    document.getElementById('outKeyframe').textContent = `${keyframe}s`;
+
+    const notesEl = document.getElementById('outNotes');
+    notesEl.classList.toggle('warn', tooLow);
+
+    // Short, plain-language summary — always visible
+    let simpleList = `<li>${encoderNote}</li>`;
+    if (isMultistreaming) {
+      if (usingRelay) {
+        simpleList += `<li>You're using a service to reach multiple platforms, so this uses about the same amount of internet as streaming to just one.</li>`;
+      } else {
+        simpleList += `<li>Since you're sending straight to each platform yourself, your internet has to handle all of them at once — that's why the quality is lower than streaming to just one place.</li>`;
+      }
+      if (destinations.includes('tiktok')) {
+        simpleList += `<li>TikTok usually wants a lower bitrate than Twitch, so that's what's setting the ceiling here.</li>`;
+      }
+    }
+    if (tooLow) {
+      simpleList += `<li><strong>Heads up:</strong> your connection is a bit tight for this quality level — you may notice occasional blur or stutter during fast motion. If so, try switching "What matters more" to the other option, or picking a lower quality tier.</li>`;
+    }
+
+    // Deeper reasoning — tucked behind a toggle for anyone who wants it
+    let whyHtml = '';
+    if (!isMultistreaming) {
+      whyHtml += `<li>We use about ${available.toLocaleString()} kbps of your connection (70% of your measured upload), leaving room for chat, other traffic, and network hiccups.</li>`;
+      if (cap !== Infinity) {
+        whyHtml += `<li>${PLATFORM_LABELS[platform]} recommends staying around ${cap.toLocaleString()} kbps or under.</li>`;
+      }
+    } else {
+      const destLabels = destinations.map(p => PLATFORM_LABELS[p]).join(' + ');
+      const strictest = destinations.reduce((a, b) => PLATFORM_CAPS[a] <= PLATFORM_CAPS[b] ? a : b);
+      whyHtml += `<li>You're streaming to ${destLabels}. The bitrate is set by whichever of these is strictest — here, ${PLATFORM_LABELS[strictest]} at ~${PLATFORM_CAPS[strictest].toLocaleString()} kbps.</li>`;
+      if (usingRelay) {
+        whyHtml += `<li>With a relay service, your computer uploads once (~${totalAvailable.toLocaleString()} kbps available) and the service copies it out to each platform for you.</li>`;
+      } else {
+        whyHtml += `<li>With no relay, your connection carries ${destinations.length} full copies of your stream at once, so your ~${totalAvailable.toLocaleString()} kbps gets split ${destinations.length} ways to about ${available.toLocaleString()} kbps each. A relay service would let you use closer to the full amount.</li>`;
+      }
+      if (destinations.includes('tiktok')) {
+        whyHtml += `<li>TikTok doesn't publish an official max bitrate the way Twitch does — 6,000 kbps is a commonly used practical estimate. Also, TikTok LIVE is usually vertical while Twitch/YouTube are widescreen; that's a separate OBS scene you'd need to set up yourself, this tool doesn't handle it.</li>`;
+      }
+    }
+    whyHtml += `<li>Set OBS's keyframe interval to ${keyframe} seconds — Twitch and YouTube both expect this, and most encoders default to it anyway.</li>`;
+    whyHtml += `<li>Treat these as a starting point. Once you're live, open OBS's Stats window (View → Stats) and adjust if you see dropped frames or encoding lag.</li>`;
+
+    notesEl.innerHTML = `
+      <ul class="simple-list">${simpleList}</ul>
+      <details>
+        <summary>Why these settings?</summary>
+        <div class="detail-body"><ul>${whyHtml}</ul></div>
+      </details>
+    `;
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+</script>
+</body>
+</html>

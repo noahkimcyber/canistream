@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twitch vs YouTube vs TikTok vs Kick: Streaming Requirements Compared</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+    --warn: #f5a623;
+    --warn-soft: rgba(245,166,35,0.12);
+    --good: #4cc38a;
+    --good-soft: rgba(76,195,138,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px 64px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0 0 28px; line-height: 1.6; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 0.95rem; color: var(--text); margin: 0 0 14px; font-weight: 700; }
+  p { font-size: 0.9rem; color: var(--text); }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 640px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; font-weight: 600; }
+  td.platform { font-weight: 700; color: var(--accent); white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .callouts { display: grid; gap: 12px; }
+  .callout {
+    background: #0f1115;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  .callout strong { color: var(--text); }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout.good { border-left-color: var(--good); }
+  .tools-list { display: grid; gap: 10px; margin-top: 8px; }
+  .tools-list a {
+    display: block;
+    background: #0f1115;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.88rem;
+  }
+  .tools-list a:hover { border-color: var(--accent); }
+  .tools-list a span { display: block; color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+  .verified-note {
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-align: center;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+  .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-nav">
+    <a href="index.html" class="site-nav-brand">CanIStream</a>
+    <div class="site-nav-links">
+      <a href="stream-settings-calculator.html">Settings</a>
+      <a href="pc-streaming-check.html">PC Check</a>
+      <a href="storage-calculator.html">Storage</a>
+      <a href="audio-settings-helper.html">Audio</a>
+      <a href="platform-comparison.html">Platforms</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <h1>Twitch vs. YouTube vs. TikTok vs. Kick: Streaming Requirements Compared</h1>
+  <p class="subtitle">
+    The four major platforms don't all want the same thing from OBS. Here's what
+    actually differs — bitrate ceilings, codecs, resolution, and the quirks that
+    trip people up, especially if you're streaming to more than one at once.
+  </p>
+
+  <div class="card">
+    <h2>At a glance</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Platform</th>
+            <th>Max video bitrate</th>
+            <th>Resolution / FPS</th>
+            <th>Codec</th>
+            <th>Audio bitrate</th>
+            <th>Keyframe interval</th>
+            <th>Rate control</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="platform">Twitch</td>
+            <td>6,000 kbps<br>(same for Affiliates and Partners)</td>
+            <td>Up to 1080p, 60fps</td>
+            <td>H.264 only</td>
+            <td>160 kbps (1080p)<br>128 kbps (720p and under)</td>
+            <td>2 seconds (required)</td>
+            <td>CBR</td>
+          </tr>
+          <tr>
+            <td class="platform">YouTube</td>
+            <td>~35,000 kbps at 4K60<br>(much higher ceiling than the others)</td>
+            <td>Up to 4K, 60fps</td>
+            <td>H.264, H.265, or AV1</td>
+            <td>128 kbps stereo</td>
+            <td>2 seconds recommended (4s max)</td>
+            <td>CBR recommended</td>
+          </tr>
+          <tr>
+            <td class="platform">TikTok</td>
+            <td>~4,000–6,000 kbps</td>
+            <td>1080×1920 vertical (9:16), 30 or 60fps</td>
+            <td>H.264</td>
+            <td>128 kbps</td>
+            <td>2 seconds</td>
+            <td>CBR</td>
+          </tr>
+          <tr>
+            <td class="platform">Kick</td>
+            <td>1,000–8,000 kbps</td>
+            <td>Up to 1080p, 60fps</td>
+            <td>H.264 only (H.265 not supported)</td>
+            <td>Stereo, 48kHz max</td>
+            <td>2 seconds</td>
+            <td>CBR required — VBR isn't supported</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What actually matters here</h2>
+    <div class="callouts">
+      <div class="callout warn">
+        <strong>Twitch Partner status doesn't raise your bitrate cap.</strong> Both Affiliates and Partners
+        are capped at 6,000 kbps — the difference between tiers is about transcoding availability
+        (extra quality options for viewers), not how much bitrate you're allowed to send.
+      </div>
+      <div class="callout good">
+        <strong>YouTube's ceiling is much higher than everyone else's.</strong> If you've got the upload
+        speed for it, YouTube supports resolutions and bitrates the other three platforms simply don't —
+        useful to know if quality is your priority and you're choosing where to focus.
+      </div>
+      <div class="callout">
+        <strong>TikTok LIVE is built around vertical video.</strong> A 1920×1080 landscape scene will
+        letterbox or crop awkwardly — if TikTok is a real destination for you, it's worth setting up a
+        separate vertical (1080×1920) scene in OBS rather than reusing your landscape one.
+      </div>
+      <div class="callout warn">
+        <strong>Kick won't accept VBR.</strong> If your encoder is set to variable bitrate (a common default
+        in some setups), switch it to CBR before streaming to Kick — this is stricter than what Twitch or
+        YouTube require.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Multistreaming? The strictest platform sets your ceiling</h2>
+    <p>
+      If you're sending one stream to several of these platforms at once — through a relay service like
+      Restream, or directly from OBS — your bitrate has to satisfy the strictest one in the mix, not just
+      your main platform. Twitch + TikTok together means capping out around 6,000 kbps even though
+      Twitch alone would allow the same, and adding YouTube to the mix changes nothing since its ceiling
+      is already far above the others. Kick's CBR requirement and TikTok's vertical format are the kind
+      of platform-specific quirks that don't show up until you actually try to combine them — worth
+      checking before you go live on more than one at a time.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Get your exact settings</h2>
+    <p style="margin-bottom: 0;">These numbers are the ceiling — the calculators below turn them into the actual settings for your connection and hardware.</p>
+    <div class="tools-list">
+      <a href="stream-settings-calculator.html">Stream Settings Calculator<span>Resolution, bitrate, and encoder — including multistreaming</span></a>
+      <a href="pc-streaming-check.html">Can My PC Handle Streaming?<span>Check if your hardware can keep up</span></a>
+      <a href="audio-settings-helper.html">Audio Settings Helper<span>Bitrate, filters, and track setup for your mic</span></a>
+      <a href="storage-calculator.html">Storage Calculator<span>How much drive space your recordings will use</span></a>
+    </div>
+  </div>
+
+  <p class="verified-note">
+    Figures on this page were checked against current platform and community streaming guides.
+    Platforms change these numbers occasionally — if something here looks off or outdated, it's
+    worth double-checking directly with the platform before assuming this page is still current.
+  </p>
+</div>
+</body>
+</html>

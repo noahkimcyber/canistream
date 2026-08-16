@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBS Audio Settings Helper (Prototype)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+    --warn: #f5a623;
+    --warn-soft: rgba(245,166,35,0.12);
+    --good: #4cc38a;
+    --good-soft: rgba(76,195,138,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0 0 28px; line-height: 1.5; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 18px; font-weight: 600; }
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--text); }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-option {
+    flex: 1; min-width: 140px; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; cursor: pointer; font-size: 0.85rem; text-align: center; transition: all 0.15s ease;
+  }
+  .radio-option .sub { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .radio-option.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .radio-option.selected .sub { color: var(--accent); opacity: 0.8; }
+  button {
+    width: 100%; padding: 13px; border: none; border-radius: 8px; background: var(--accent);
+    color: #0f1115; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px;
+  }
+  button:hover { opacity: 0.9; }
+  #results { display: none; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .result-tile { background: #0f1115; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .result-tile .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 6px; }
+  .result-tile .value { font-size: 1.05rem; font-weight: 600; }
+  .notes {
+    background: var(--accent-soft); border: 1px solid rgba(110,168,254,0.25); border-radius: 10px;
+    padding: 14px 16px; font-size: 0.85rem; line-height: 1.6; color: var(--text);
+  }
+  .notes ul.simple-list { margin: 0 0 10px; padding-left: 18px; }
+  .notes ul.simple-list li { margin-bottom: 4px; }
+  details { font-size: 0.8rem; color: var(--muted); }
+  details summary { cursor: pointer; color: var(--accent); font-size: 0.8rem; padding: 2px 0; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: "+ "; }
+  details[open] summary::before { content: "\2013 "; }
+  details .detail-body { margin-top: 10px; line-height: 1.6; }
+  .notes .detail-body ul { margin: 6px 0 0; padding-left: 18px; }
+  .notes .detail-body li { margin-bottom: 4px; }
+  .steps { background: #0f1115; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+  .steps .steps-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 10px; }
+  .steps ol { margin: 0; padding-left: 18px; font-size: 0.85rem; line-height: 1.7; }
+  .steps code { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 0.82rem; }
+  .footer-note { color: var(--muted); font-size: 0.78rem; text-align: center; margin-top: 28px; line-height: 1.6; }
+
+  .track-diagram { display: none; margin-top: 14px; }
+  .track-diagram.show { display: block; }
+  .track-diagram .diagram-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 10px; }
+  .track-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+  .track-legend .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.76rem; color: var(--muted); }
+  .track-legend .swatch { width: 10px; height: 10px; border-radius: 3px; }
+  .track-rows { display: flex; flex-direction: column; gap: 8px; }
+  .track-row {
+    display: flex; align-items: center; gap: 12px; background: #0f1115;
+    border: 1px solid var(--border); border-left: 3px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; flex-wrap: wrap;
+  }
+  .track-row.live { border-left-color: var(--good); }
+  .track-row .track-name { min-width: 90px; font-weight: 600; font-size: 0.82rem; }
+  .track-row .track-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .chip.mic { background: rgba(110,168,254,0.15); color: var(--accent); border: 1px solid rgba(110,168,254,0.4); }
+  .chip.game { background: rgba(76,195,138,0.15); color: var(--good); border: 1px solid rgba(76,195,138,0.4); }
+  .chip.music { background: rgba(245,166,35,0.15); color: var(--warn); border: 1px solid rgba(245,166,35,0.4); }
+  .track-row .track-purpose { font-size: 0.74rem; color: var(--muted); margin-left: auto; }
+  .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-nav">
+    <a href="index.html" class="site-nav-brand">CanIStream</a>
+    <div class="site-nav-links">
+      <a href="stream-settings-calculator.html">Settings</a>
+      <a href="pc-streaming-check.html">PC Check</a>
+      <a href="storage-calculator.html">Storage</a>
+      <a href="audio-settings-helper.html">Audio</a>
+      <a href="platform-comparison.html">Platforms</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <h1>OBS Audio Settings Helper</h1>
+  <p class="subtitle">
+    Audio is the part people tend to guess at. Answer three quick questions and get
+    the exact settings to use, plus where to find them in OBS. Runs entirely in your
+    browser — nothing is sent anywhere.
+  </p>
+
+  <div class="card">
+    <h2>What's in your stream's audio</h2>
+    <div class="field">
+      <label>Pick the closest match</label>
+      <div class="radio-group" id="sourceGroup">
+        <div class="radio-option" data-value="micOnly">Just my mic<span class="sub">talking, no game/music</span></div>
+        <div class="radio-option selected" data-value="micGame">Mic + game audio<span class="sub">most streams</span></div>
+        <div class="radio-option" data-value="music">Mic + music or DJ set<span class="sub">music is the focus</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Editing afterward</h2>
+    <div class="field">
+      <label>Do you plan to edit your VODs or make clips later (YouTube, TikTok, etc.)?</label>
+      <div class="radio-group" id="editGroup">
+        <div class="radio-option selected" data-value="no">No, just live</div>
+        <div class="radio-option" data-value="yes">Yes, I'll edit it</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your room and mic</h2>
+    <div class="field">
+      <label>Is there background noise you'd want removed — fan, keyboard, echo, hum?</label>
+      <div class="radio-group" id="noiseGroup">
+        <div class="radio-option selected" data-value="some">Some background noise</div>
+        <div class="radio-option" data-value="quiet">Pretty quiet already</div>
+        <div class="radio-option" data-value="loud">Noticeably noisy</div>
+      </div>
+    </div>
+  </div>
+
+  <button id="checkBtn">Get my audio settings</button>
+
+  <div id="results">
+    <div class="card">
+      <h2>Your OBS audio settings</h2>
+      <div class="result-grid">
+        <div class="result-tile"><div class="label">Sample rate</div><div class="value" id="outSampleRate">–</div></div>
+        <div class="result-tile"><div class="label">Channels</div><div class="value" id="outChannels">–</div></div>
+        <div class="result-tile"><div class="label">Audio bitrate</div><div class="value" id="outBitrate">–</div></div>
+        <div class="result-tile"><div class="label">Mic filters</div><div class="value" id="outFilters">–</div></div>
+        <div class="result-tile"><div class="label">Audio track setup</div><div class="value" id="outTracks">–</div></div>
+        <div class="result-tile"><div class="label">Target mic level</div><div class="value" id="outLevel">–</div></div>
+      </div>
+      <div class="notes" id="outNotes"></div>
+      <div class="track-diagram" id="trackDiagram">
+        <div class="diagram-title">Your audio tracks</div>
+        <div class="track-legend">
+          <div class="legend-item"><span class="swatch" style="background: var(--accent);"></span>Mic</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--good);"></span>Game audio</div>
+          <div class="legend-item"><span class="swatch" style="background: var(--warn);"></span>Music</div>
+        </div>
+        <div class="track-rows" id="trackRows"></div>
+      </div>
+      <div class="steps">
+        <div class="steps-title">Where to set this in OBS</div>
+        <ol id="outSteps"></ol>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    These are rule-of-thumb defaults based on common OBS and platform audio guides — a good
+    starting point, not a substitute for actually listening back to a test recording.
+  </p>
+</div>
+
+<script>
+  document.querySelectorAll('.radio-group').forEach(group => {
+    group.addEventListener('click', (e) => {
+      const opt = e.target.closest('.radio-option');
+      if (!opt) return;
+      group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  function getSelected(groupId) {
+    return document.querySelector(`#${groupId} .radio-option.selected`).dataset.value;
+  }
+
+  document.getElementById('checkBtn').addEventListener('click', () => {
+    const source = getSelected('sourceGroup'); // micOnly | micGame | music
+    const willEdit = getSelected('editGroup') === 'yes';
+    const noise = getSelected('noiseGroup'); // some | quiet | loud
+
+    // Sample rate: always 48kHz — this is what Twitch/YouTube/TikTok/Kick all expect,
+    // and it's OBS's own default, so there's no real decision to make here.
+    const sampleRate = '48 kHz';
+
+    // Channels: stereo covers virtually everyone. Mono only really makes sense for a
+    // single mono mic feed with nothing else mixed in, which is rare in practice.
+    const channels = 'Stereo';
+
+    // Audio bitrate by source complexity
+    let bitrate, bitrateNote;
+    if (source === 'music') {
+      bitrate = '320 kbps';
+      bitrateNote = 'Music-heavy audio benefits from the highest bitrate OBS offers — anything lower and cymbals/highs start sounding compressed.';
+    } else if (source === 'micGame') {
+      bitrate = '160 kbps';
+      bitrateNote = 'Voice plus game audio sounds clean at 160 kbps without wasting bits you don\'t need.';
+    } else {
+      bitrate = '128 kbps';
+      bitrateNote = 'Voice alone is the least demanding audio to encode — 128 kbps is plenty and keeps your overall stream bitrate budget free for video.';
+    }
+
+    // Noise filters
+    let filters, filterSteps;
+    if (noise === 'loud') {
+      filters = 'Noise Suppression + Noise Gate';
+      filterSteps = [
+        'Add the <strong>Noise Suppression</strong> filter first, method set to <strong>RNNoise</strong> (better quality than Speex for most rooms).',
+        'Add a <strong>Noise Gate</strong> filter after it — start around <strong>-30 dB</strong> close threshold, raise it if background noise still leaks through between words.',
+      ];
+    } else if (noise === 'some') {
+      filters = 'Noise Suppression (RNNoise)';
+      filterSteps = [
+        'Add the <strong>Noise Suppression</strong> filter, method set to <strong>RNNoise</strong> — this alone clears up most fan/hum noise without a gate.',
+      ];
+    } else {
+      filters = 'Noise Suppression (light)';
+      filterSteps = [
+        'A quiet room may not need much — a light <strong>Noise Suppression</strong> filter (RNNoise) is still worth adding as a safety net for incidental noise.',
+      ];
+    }
+
+    // Track setup — build the actual list of tracks so we can both label the result
+    // tile and draw a diagram of what goes where.
+    const CHIP_LABELS = { mic: 'Mic', game: 'Game audio', music: 'Music' };
+    const chipHtml = key => `<span class="chip ${key}">${CHIP_LABELS[key]}</span>`;
+
+    const sourceChips = source === 'micOnly' ? ['mic'] : source === 'micGame' ? ['mic', 'game'] : ['mic', 'music'];
+    const trackList = [{ name: 'Track 1', chips: sourceChips, purpose: 'Goes out live to viewers', live: true }];
+
+    let tracks, trackNote, multiTrack = false;
+    if (willEdit && source !== 'micOnly') {
+      multiTrack = true;
+      trackList.push({ name: 'Track 2', chips: ['mic'], purpose: 'Recorded only — isolates your voice for editing', live: false });
+      if (source === 'music') {
+        trackList.push({ name: 'Track 3', chips: ['music'], purpose: 'Recorded only — isolates the music bed for editing', live: false });
+      }
+      tracks = `${trackList.length} tracks`;
+      trackNote = 'Recording your mic (and music, if that applies) on their own tracks means you can adjust or fix each one independently when editing later, without it being baked into the live mix.';
+    } else if (willEdit && source === 'micOnly') {
+      tracks = '1 track';
+      trackNote = "Even though you're editing later, your mic is the only real source here — a second track wouldn't separate anything useful, so one track covers you.";
+    } else {
+      tracks = '1 track';
+      trackNote = "If you're not editing afterward, one mixed track for everything is simpler and there's nothing extra to manage.";
+    }
+
+    const level = '-12 dB to -6 dB';
+
+    document.getElementById('outSampleRate').textContent = sampleRate;
+    document.getElementById('outChannels').textContent = channels;
+    document.getElementById('outBitrate').textContent = bitrate;
+    document.getElementById('outFilters').textContent = filters;
+    document.getElementById('outTracks').textContent = tracks;
+    document.getElementById('outLevel').textContent = level;
+
+    const diagramEl = document.getElementById('trackDiagram');
+    if (multiTrack) {
+      diagramEl.classList.add('show');
+      document.getElementById('trackRows').innerHTML = trackList.map(t => `
+        <div class="track-row ${t.live ? 'live' : ''}">
+          <div class="track-name">${t.name}${t.live ? ' (live)' : ''}</div>
+          <div class="track-chips">${t.chips.map(chipHtml).join('')}</div>
+          <div class="track-purpose">${t.purpose}</div>
+        </div>
+      `).join('');
+    } else {
+      diagramEl.classList.remove('show');
+      document.getElementById('trackRows').innerHTML = '';
+    }
+
+    const simpleList = `
+      <li>${bitrateNote}</li>
+      <li>${filters === 'Noise Suppression + Noise Gate' ? 'Since your room is noisy, use both a suppression filter and a gate together for the cleanest result.' : 'Add a Noise Suppression filter on your mic — it\'s free quality with almost no downside.'}</li>
+      <li>${trackNote}</li>
+      <li>Watch your mic's meter in OBS while you talk at normal volume — aim for it sitting in the ${level} range, not spiking into the red.</li>
+    `;
+
+    const whyHtml = `
+      <li>48 kHz sample rate matches what every major platform expects — using anything else can cause subtle audio sync drift over a long stream.</li>
+      <li>Stereo is the safe default even for a single mono mic, since OBS still mixes everything (mic, game, alerts, music) into a stereo output track.</li>
+      <li>128/160/320 kbps audio bitrate tiers roughly match what Twitch, YouTube, and TikTok themselves recommend for voice vs. music content.</li>
+      <li>RNNoise is a machine-learning based suppression model built into OBS — it handles steady background noise (fans, hum, light static) noticeably better than the older Speex option.</li>
+      <li>A Noise Gate mutes your mic between words below a volume threshold, which helps most when there's noise you want cut out completely, not just reduced.</li>
+    `;
+
+    document.getElementById('outNotes').innerHTML = `
+      <ul class="simple-list">${simpleList}</ul>
+      <details>
+        <summary>Why these settings?</summary>
+        <div class="detail-body"><ul>${whyHtml}</ul></div>
+      </details>
+    `;
+
+    const stepsList = [
+      `Sample rate: <code>Settings → Audio → Sample Rate → 48kHz</code>`,
+      `Channels: <code>Settings → Audio → Channels → Stereo</code>`,
+      `Audio bitrate: <code>Settings → Output → Audio Bitrate → ${bitrate.replace(' kbps', '')}</code>`,
+      ...filterSteps.map(s => `<span>${s}</span> — found under <code>Audio Mixer → gear icon on your mic → Filters → +</code>`),
+      multiTrack
+        ? `Track setup: <code>Audio Mixer → gear icon on each source → Advanced Audio Properties</code>, then check the tracks shown in the diagram above for each source — Track 1 gets everything (that's your live stream), the rest get just their one isolated source. In <code>Settings → Output</code>, set Track 1 as the track you actually stream.`
+        : `Track setup: no change needed — OBS's default single track covers you.`,
+    ];
+    document.getElementById('outSteps').innerHTML = stepsList.map(s => `<li>${s}</li>`).join('');
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CanIStream — Free Tools for Streamers</title>
+<meta name="description" content="Free calculators to check if your PC can handle streaming, what OBS settings to use, how much storage you'll need, and more — no signup required.">
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+    --good: #4cc38a;
+    --good-soft: rgba(76,195,138,0.12);
+    --warn: #f5a623;
+    --warn-soft: rgba(245,166,35,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .site-nav {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+  }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 18px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+
+  .hero { max-width: 720px; margin: 0 auto; padding: 56px 16px 20px; text-align: center; }
+  .hero h1 { font-size: 2rem; margin: 0 0 12px; }
+  .hero p { color: var(--muted); font-size: 1rem; line-height: 1.6; max-width: 560px; margin: 0 auto; }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+  .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+  .tool-card {
+    display: block; background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; text-decoration: none; color: var(--text); transition: border-color 0.15s ease;
+  }
+  .tool-card:hover { border-color: var(--accent); }
+  .tool-card .tag {
+    display: inline-block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; margin-bottom: 12px;
+  }
+  .tool-card h2 { font-size: 1.05rem; margin: 0 0 8px; }
+  .tool-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin: 0; }
+
+  .content-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 22px; margin-top: 16px; text-decoration: none; display: block; color: var(--text);
+  }
+  .content-card:hover { border-color: var(--accent); }
+  .content-card h2 { font-size: 1rem; margin: 0 0 6px; }
+  .content-card p { font-size: 0.85rem; color: var(--muted); margin: 0; line-height: 1.5; }
+
+  .footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 32px 16px; border-top: 1px solid var(--border); margin-top: 24px; }
+  .footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="site-nav">
+  <a href="index.html" class="site-nav-brand">CanIStream</a>
+  <div class="site-nav-links">
+    <a href="stream-settings-calculator.html">Settings</a>
+    <a href="pc-streaming-check.html">PC Check</a>
+    <a href="storage-calculator.html">Storage</a>
+    <a href="audio-settings-helper.html">Audio</a>
+    <a href="platform-comparison.html">Platforms</a>
+    <a href="about.html">About</a>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Know your settings before you go live.</h1>
+  <p>
+    Free tools that answer the questions every streamer runs into — what bitrate to use,
+    whether your PC can keep up, how much storage you'll burn through, and more. No signup,
+    no download, nothing sent anywhere.
+  </p>
+</div>
+
+<div class="wrap">
+  <div class="tool-grid">
+    <a class="tool-card" href="stream-settings-calculator.html">
+      <span class="tag">Calculator</span>
+      <h2>Stream Settings Calculator</h2>
+      <p>Get the exact OBS resolution, bitrate, and encoder for your connection and hardware — including multistreaming to more than one platform.</p>
+    </a>
+    <a class="tool-card" href="pc-streaming-check.html">
+      <span class="tag">Calculator</span>
+      <h2>Can My PC Handle Streaming?</h2>
+      <p>Check whether your computer can game and stream at once, or if you need a capture card, second PC, or upgrade.</p>
+    </a>
+    <a class="tool-card" href="storage-calculator.html">
+      <span class="tag">Calculator</span>
+      <h2>Storage Calculator</h2>
+      <p>Find out how fast your recordings eat up drive space, and what size drive to actually get.</p>
+    </a>
+    <a class="tool-card" href="audio-settings-helper.html">
+      <span class="tag">Calculator</span>
+      <h2>Audio Settings Helper</h2>
+      <p>Bitrate, noise filters, and track setup for your mic — plus exactly where to find each setting in OBS.</p>
+    </a>
+  </div>
+
+  <a class="content-card" href="platform-comparison.html">
+    <h2>Twitch vs. YouTube vs. TikTok vs. Kick, compared</h2>
+    <p>A reference table of what each platform actually requires, and the quirks that trip people up when streaming to more than one.</p>
+  </a>
+</div>
+
+<div class="footer">
+  <a href="about.html">About</a> &middot; <a href="privacy.html">Privacy Policy</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — CanIStream</title>
+<meta name="description" content="Why CanIStream exists, who built it, and how it stays free.">
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
+  .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 18px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 48px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 20px; }
+  p { font-size: 0.95rem; line-height: 1.7; color: var(--text); }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 16px; }
+  .card h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 10px; }
+  .footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 32px 16px; border-top: 1px solid var(--border); margin-top: 24px; }
+  .footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="site-nav">
+  <a href="index.html" class="site-nav-brand">CanIStream</a>
+  <div class="site-nav-links">
+    <a href="stream-settings-calculator.html">Settings</a>
+    <a href="pc-streaming-check.html">PC Check</a>
+    <a href="storage-calculator.html">Storage</a>
+    <a href="audio-settings-helper.html">Audio</a>
+    <a href="platform-comparison.html">Platforms</a>
+    <a href="about.html">About</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1>About CanIStream</h1>
+
+  <p>
+    CanIStream is a small set of free tools for streamers, built by someone who works in IT,
+    has spent time editing video professionally, and streams on the side — the same person
+    who kept getting asked to fix other people's OBS setups, and figured the answers could
+    just live somewhere instead of being re-explained every time.
+  </p>
+  <p>
+    Every tool here runs entirely in your browser. Nothing you enter — your connection speed,
+    your hardware, your streaming setup — gets sent to a server or stored anywhere. You can
+    check the page source yourself if you want to verify that.
+  </p>
+
+  <div class="card">
+    <h2>How this stays free</h2>
+    <p style="margin:0;">
+      CanIStream is supported by ads and by affiliate links on some pages — if you click through
+      to a product and buy it, this site may earn a small commission at no extra cost to you.
+      Recommendations aim to be genuinely useful, not just whatever pays the most. Full details
+      are on the <a href="privacy.html" style="color:var(--accent);">Privacy Policy</a> page.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Accuracy</h2>
+    <p style="margin:0;">
+      Platform bitrate limits, resolution caps, and similar numbers are checked against current
+      platform and community guides, but streaming platforms do change these from time to time.
+      If something here looks out of date, that's worth flagging directly with the platform
+      rather than assuming this page is still current.
+    </p>
+  </div>
+
+  <p>
+    Questions, corrections, or a tool you wish existed? Reach out any time.
+  </p>
+</div>
+
+<div class="footer">
+  <a href="index.html">Home</a> &middot; <a href="privacy.html">Privacy Policy</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Much Storage Will My Recordings Use? (Prototype)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --border: #262b36;
+    --text: #e6e8ec;
+    --muted: #8b93a3;
+    --accent: #6ea8fe;
+    --accent-soft: rgba(110,168,254,0.12);
+    --warn: #f5a623;
+    --warn-soft: rgba(245,166,35,0.12);
+    --good: #4cc38a;
+    --good-soft: rgba(76,195,138,0.12);
+    --bad: #ff6b6b;
+    --bad-soft: rgba(255,107,107,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin: 0 0 28px; line-height: 1.5; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 18px; font-weight: 600; }
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--text); }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  input[type="number"], select {
+    width: 100%; background: #0f1115; border: 1px solid var(--border); color: var(--text);
+    padding: 10px 12px; border-radius: 8px; font-size: 0.95rem;
+  }
+  input[type="number"]:focus, select:focus { outline: none; border-color: var(--accent); }
+  .row { display: flex; gap: 12px; }
+  .row .field { flex: 1; }
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-option {
+    flex: 1; min-width: 130px; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; cursor: pointer; font-size: 0.85rem; text-align: center; transition: all 0.15s ease;
+  }
+  .radio-option.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  button {
+    width: 100%; padding: 13px; border: none; border-radius: 8px; background: var(--accent);
+    color: #0f1115; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 6px;
+  }
+  button:hover { opacity: 0.9; }
+  #results { display: none; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .result-tile { background: #0f1115; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .result-tile .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 6px; }
+  .result-tile .value { font-size: 1.15rem; font-weight: 600; }
+  .notes {
+    background: var(--accent-soft); border: 1px solid rgba(110,168,254,0.25); border-radius: 10px;
+    padding: 14px 16px; font-size: 0.85rem; line-height: 1.6; color: var(--text);
+  }
+  .notes ul.simple-list { margin: 0 0 10px; padding-left: 18px; }
+  .notes ul.simple-list li { margin-bottom: 4px; }
+  details { font-size: 0.8rem; color: var(--muted); }
+  details summary { cursor: pointer; color: var(--accent); font-size: 0.8rem; padding: 2px 0; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: "+ "; }
+  details[open] summary::before { content: "\2013 "; }
+  details .detail-body { margin-top: 10px; line-height: 1.6; }
+  .notes .detail-body ul { margin: 6px 0 0; padding-left: 18px; }
+  .notes .detail-body li { margin-bottom: 4px; }
+  .gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
+  .gear-card { background: #0f1115; border: 1px dashed var(--border); border-radius: 10px; padding: 14px; }
+  .gear-card .cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 6px; }
+  .gear-card .desc { font-size: 0.82rem; line-height: 1.5; margin-bottom: 8px; }
+  .gear-card .placeholder-link { font-size: 0.78rem; color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); }
+  .field-error { color: var(--bad); font-size: 0.78rem; margin-top: 6px; display: none; }
+  .field-error.show { display: block; }
+  .input-error { border-color: var(--bad) !important; }
+  .footer-note { color: var(--muted); font-size: 0.78rem; text-align: center; margin-top: 28px; line-height: 1.6; }
+  .site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .site-nav-brand { color: var(--text); font-weight: 700; text-decoration: none; font-size: 1rem; }
+  .site-nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+  .site-nav-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; }
+  .site-nav-links a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-nav">
+    <a href="index.html" class="site-nav-brand">CanIStream</a>
+    <div class="site-nav-links">
+      <a href="stream-settings-calculator.html">Settings</a>
+      <a href="pc-streaming-check.html">PC Check</a>
+      <a href="storage-calculator.html">Storage</a>
+      <a href="audio-settings-helper.html">Audio</a>
+      <a href="platform-comparison.html">Platforms</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <h1>How Much Storage Will My Recordings Use?</h1>
+  <p class="subtitle">
+    Figure out how fast your recordings eat up drive space, and how big a drive
+    you actually need. Runs entirely in your browser — nothing is sent anywhere.
+  </p>
+
+  <div class="card">
+    <h2>What you record at</h2>
+    <div class="field">
+      <label for="resTarget">Recording resolution and frame rate</label>
+      <select id="resTarget">
+        <option value="720p30">720p, 30fps</option>
+        <option value="720p60">720p, 60fps</option>
+        <option value="1080p30">1080p, 30fps</option>
+        <option value="1080p60" selected>1080p, 60fps</option>
+        <option value="1440p60">1440p, 60fps</option>
+        <option value="4k30">4K, 30fps</option>
+        <option value="4k60">4K, 60fps</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Recording quality</label>
+      <div class="radio-group" id="qualityGroup">
+        <div class="radio-option" data-value="smaller">Smaller files</div>
+        <div class="radio-option selected" data-value="best">Best quality</div>
+      </div>
+      <div class="hint">Recording locally isn't limited by upload speed like streaming is, so quality is really just a file-size trade-off.</div>
+    </div>
+    <div class="field">
+      <label>Audio</label>
+      <div class="radio-group" id="audioGroup">
+        <div class="radio-option selected" data-value="voice">Mostly voice/game audio</div>
+        <div class="radio-option" data-value="music">Music-heavy</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>How much you record</h2>
+    <div class="field">
+      <label for="hoursPerWeek">Hours recorded per week</label>
+      <input type="number" id="hoursPerWeek" placeholder="e.g. 10" min="0" step="0.5">
+      <div class="field-error" id="hoursError">Enter how many hours you record per week.</div>
+    </div>
+  </div>
+
+  <button id="calcBtn">Calculate my storage use</button>
+
+  <div id="results">
+    <div class="card">
+      <h2>Your storage use</h2>
+      <div class="result-grid">
+        <div class="result-tile">
+          <div class="label">Per hour</div>
+          <div class="value" id="outPerHour">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Per week</div>
+          <div class="value" id="outPerWeek">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Per month</div>
+          <div class="value" id="outPerMonth">–</div>
+        </div>
+        <div class="result-tile">
+          <div class="label">Recommended drive</div>
+          <div class="value" id="outDrive">–</div>
+        </div>
+      </div>
+      <div class="notes" id="outNotes"></div>
+      <div class="gear-grid" id="gearGrid"></div>
+    </div>
+  </div>
+
+  <p class="footer-note">
+    These are rule-of-thumb estimates based on typical OBS recording bitrates, not a guarantee —
+    your actual file sizes depend on the exact codec, container, and encoder settings you use.
+    "GB" here means decimal gigabytes (1,000 MB), matching how drives are usually sold.
+  </p>
+</div>
+
+<script>
+  // Typical local recording bitrates (kbps) by resolution/fps and quality preference.
+  // Recording isn't bandwidth-constrained like streaming, so these run higher than
+  // the streaming bitrates in the settings calculator.
+  const RECORD_BITRATE = {
+    '720p30':  { smaller: 4000,  best: 8000  },
+    '720p60':  { smaller: 6000,  best: 10000 },
+    '1080p30': { smaller: 6000,  best: 12000 },
+    '1080p60': { smaller: 9000,  best: 18000 },
+    '1440p60': { smaller: 15000, best: 25000 },
+    '4k30':    { smaller: 20000, best: 35000 },
+    '4k60':    { smaller: 30000, best: 50000 },
+  };
+  const RES_LABELS = {
+    '720p30': '720p/30fps', '720p60': '720p/60fps',
+    '1080p30': '1080p/30fps', '1080p60': '1080p/60fps',
+    '1440p60': '1440p/60fps', '4k30': '4K/30fps', '4k60': '4K/60fps',
+  };
+
+  const DRIVE_SIZES_GB = [500, 1000, 2000, 4000, 8000, 12000];
+  const DRIVE_LABELS = { 500: '500GB', 1000: '1TB', 2000: '2TB', 4000: '4TB', 8000: '8TB', 12000: '12TB' };
+
+  document.querySelectorAll('.radio-group').forEach(group => {
+    group.addEventListener('click', (e) => {
+      const opt = e.target.closest('.radio-option');
+      if (!opt) return;
+      group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  function getSelected(groupId) {
+    return document.querySelector(`#${groupId} .radio-option.selected`).dataset.value;
+  }
+
+  function setFieldError(inputEl, errorEl, hasError) {
+    errorEl.classList.toggle('show', hasError);
+    if (inputEl) inputEl.classList.toggle('input-error', hasError);
+  }
+
+  document.getElementById('hoursPerWeek').addEventListener('input', () => {
+    setFieldError(document.getElementById('hoursPerWeek'), document.getElementById('hoursError'), false);
+  });
+
+  function formatGB(gb) {
+    if (gb >= 1000) return `${(gb / 1000).toFixed(2)} TB`;
+    if (gb < 1) return `${(gb * 1000).toFixed(0)} MB`;
+    return `${gb.toFixed(1)} GB`;
+  }
+
+  document.getElementById('calcBtn').addEventListener('click', () => {
+    const hoursInput = document.getElementById('hoursPerWeek');
+    const hoursPerWeek = parseFloat(hoursInput.value);
+    const hoursMissing = !hoursPerWeek || hoursPerWeek <= 0;
+    setFieldError(hoursInput, document.getElementById('hoursError'), hoursMissing);
+    if (hoursMissing) {
+      hoursInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const resTarget = document.getElementById('resTarget').value;
+    const quality = getSelected('qualityGroup'); // 'smaller' | 'best'
+    const audioType = getSelected('audioGroup'); // 'voice' | 'music'
+
+    const videoBitrateKbps = RECORD_BITRATE[resTarget][quality];
+    const audioBitrateKbps = audioType === 'music' ? 320 : 160;
+    const totalBitrateKbps = videoBitrateKbps + audioBitrateKbps;
+
+    // kbps -> kilobytes/sec -> GB/hour (decimal GB, matching how drives are marketed)
+    const kBps = totalBitrateKbps / 8;
+    const gbPerHour = (kBps * 3600) / 1_000_000;
+    const gbPerWeek = gbPerHour * hoursPerWeek;
+    const gbPerMonth = gbPerWeek * (365.25 / 7 / 12); // avg weeks per month
+
+    // Pick the smallest drive that holds at least ~1 month of footage at this rate.
+    const recommendedDrive = DRIVE_SIZES_GB.find(size => size >= gbPerMonth) || DRIVE_SIZES_GB[DRIVE_SIZES_GB.length - 1];
+    const weeksOnRecommended = recommendedDrive / gbPerWeek;
+
+    document.getElementById('outPerHour').textContent = formatGB(gbPerHour);
+    document.getElementById('outPerWeek').textContent = formatGB(gbPerWeek);
+    document.getElementById('outPerMonth').textContent = formatGB(gbPerMonth);
+    document.getElementById('outDrive').textContent = DRIVE_LABELS[recommendedDrive];
+
+    const notesEl = document.getElementById('outNotes');
+    let simpleList = `
+      <li>At ${RES_LABELS[resTarget]}, ${quality === 'best' ? 'best quality' : 'smaller files'}, recording eats about ${formatGB(gbPerHour)} per hour.</li>
+      <li>At ${hoursPerWeek} hour${hoursPerWeek === 1 ? '' : 's'} a week, that's roughly ${formatGB(gbPerMonth)} a month.</li>
+      <li>A ${DRIVE_LABELS[recommendedDrive]} drive would hold about ${weeksOnRecommended.toFixed(1)} weeks of footage before filling up.</li>
+    `;
+
+    const whyHtml = `
+      <li>Video bitrate assumed: ${videoBitrateKbps.toLocaleString()} kbps, based on typical OBS recording guides for ${RES_LABELS[resTarget]} at ${quality === 'best' ? 'higher' : 'smaller-file'} quality.</li>
+      <li>Audio bitrate assumed: ${audioBitrateKbps} kbps (${audioType === 'music' ? 'music-heavy' : 'standard voice/game audio'}).</li>
+      <li>Container overhead (MP4/MKV) is negligible — well under 1% — so it's not factored in separately.</li>
+      <li>"GB" is decimal (1,000 MB per GB), the way drive manufacturers label capacity — your OS may report slightly less using binary GiB.</li>
+      <li>This is your local recording footprint only. Uploading VODs to Twitch/YouTube doesn't add to this — the platform re-encodes and stores its own copy.</li>
+    `;
+
+    notesEl.innerHTML = `
+      <ul class="simple-list">${simpleList}</ul>
+      <details>
+        <summary>Why these numbers?</summary>
+        <div class="detail-body"><ul>${whyHtml}</ul></div>
+      </details>
+    `;
+
+    document.getElementById('gearGrid').innerHTML = `
+      <div class="gear-card">
+        <div class="cat">External storage</div>
+        <div class="desc">An external SSD or HDD sized for your recording habit keeps your main drive free and your recordings safe if your OS drive ever fails.</div>
+        <a class="placeholder-link" href="#" data-gear="externalDrive">See recommended picks (add affiliate link)</a>
+      </div>
+      <div class="gear-card">
+        <div class="cat">NAS / network storage</div>
+        <div class="desc">If you're recording a lot every week, a small NAS keeps growing without needing to swap drives constantly.</div>
+        <a class="placeholder-link" href="#" data-gear="nas">See recommended picks (add affiliate link)</a>
+      </div>
+    `;
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+</script>
+</body>
+</html>
