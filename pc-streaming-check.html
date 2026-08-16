@@ -132,18 +132,19 @@
   .gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
   .gear-card {
     background: #0f1115;
-    border: 1px dashed var(--border);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px;
   }
   .gear-card .cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 6px; }
   .gear-card .desc { font-size: 0.82rem; line-height: 1.5; margin-bottom: 8px; }
-  .gear-card .placeholder-link {
+  .gear-card .gear-link {
     font-size: 0.78rem;
     color: var(--accent);
     text-decoration: none;
-    border-bottom: 1px dashed var(--accent);
+    border-bottom: 1px solid var(--accent);
   }
+  .affiliate-disclosure { font-size: 0.72rem; color: var(--muted); margin-top: 10px; }
   .field-error { color: var(--bad); font-size: 0.78rem; margin-top: 6px; display: none; }
   .field-error.show { display: block; }
   .input-error { border-color: var(--bad) !important; }
@@ -282,6 +283,7 @@
       <div id="gearSection" style="display:none;">
         <div class="hint" style="margin-top:16px; margin-bottom: 0;">If you want more headroom, here's what usually helps:</div>
         <div class="gear-grid" id="gearGrid"></div>
+        <div class="affiliate-disclosure">As an Amazon Associate, this site earns from qualifying purchases.</div>
       </div>
     </div>
   </div>
@@ -391,14 +393,22 @@
     },
   };
 
+  const AMAZON_TAG = 'canistream0d-20';
+  const GEAR_SEARCH_QUERY = {
+    captureCard: 'Elgato Game Capture Neo',
+    gpuUpgrade: 'RTX 5060 Ti graphics card',
+    secondPC: 'mini pc for streaming',
+  };
+
   function gearCardHtml(key) {
     const g = GEAR_CATALOG[key];
-    // Placeholder — swap this href/text for a real affiliate link before publishing.
+    const q = encodeURIComponent(GEAR_SEARCH_QUERY[key]);
+    const url = `https://www.amazon.com/s?k=${q}&tag=${AMAZON_TAG}`;
     return `
       <div class="gear-card">
         <div class="cat">${g.cat}</div>
         <div class="desc">${g.desc}</div>
-        <a class="placeholder-link" href="#" data-gear="${key}">See recommended picks (add affiliate link)</a>
+        <a class="gear-link" href="${url}" target="_blank" rel="nofollow sponsored noopener" data-gear="${key}">See picks on Amazon →</a>
       </div>
     `;
   }

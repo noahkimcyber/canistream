@@ -76,10 +76,11 @@
   .notes .detail-body ul { margin: 6px 0 0; padding-left: 18px; }
   .notes .detail-body li { margin-bottom: 4px; }
   .gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
-  .gear-card { background: #0f1115; border: 1px dashed var(--border); border-radius: 10px; padding: 14px; }
+  .gear-card { background: #0f1115; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
   .gear-card .cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 6px; }
   .gear-card .desc { font-size: 0.82rem; line-height: 1.5; margin-bottom: 8px; }
-  .gear-card .placeholder-link { font-size: 0.78rem; color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); }
+  .gear-card .gear-link { font-size: 0.78rem; color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+  .affiliate-disclosure { font-size: 0.72rem; color: var(--muted); margin-top: 10px; }
   .field-error { color: var(--bad); font-size: 0.78rem; margin-top: 6px; display: none; }
   .field-error.show { display: block; }
   .input-error { border-color: var(--bad) !important; }
@@ -292,17 +293,22 @@
       </details>
     `;
 
+    const AMAZON_TAG = 'canistream0d-20';
+    const externalDriveUrl = `https://www.amazon.com/s?k=${encodeURIComponent('WD My Passport 4TB external hard drive')}&tag=${AMAZON_TAG}`;
+    const nasUrl = `https://www.amazon.com/s?k=${encodeURIComponent('Synology DS223 NAS')}&tag=${AMAZON_TAG}`;
+
     document.getElementById('gearGrid').innerHTML = `
       <div class="gear-card">
         <div class="cat">External storage</div>
         <div class="desc">An external SSD or HDD sized for your recording habit keeps your main drive free and your recordings safe if your OS drive ever fails.</div>
-        <a class="placeholder-link" href="#" data-gear="externalDrive">See recommended picks (add affiliate link)</a>
+        <a class="gear-link" href="${externalDriveUrl}" target="_blank" rel="nofollow sponsored noopener" data-gear="externalDrive">See picks on Amazon →</a>
       </div>
       <div class="gear-card">
         <div class="cat">NAS / network storage</div>
         <div class="desc">If you're recording a lot every week, a small NAS keeps growing without needing to swap drives constantly.</div>
-        <a class="placeholder-link" href="#" data-gear="nas">See recommended picks (add affiliate link)</a>
+        <a class="gear-link" href="${nasUrl}" target="_blank" rel="nofollow sponsored noopener" data-gear="nas">See picks on Amazon →</a>
       </div>
+      <div class="affiliate-disclosure" style="grid-column: 1 / -1;">As an Amazon Associate, this site earns from qualifying purchases.</div>
     `;
 
     document.getElementById('results').style.display = 'block';
