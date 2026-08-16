@@ -388,6 +388,10 @@
       cat: 'GPU with a hardware encoder',
       desc: 'A newer Nvidia, AMD, or Intel card with NVENC/AMF/Quick Sync handles encoding mostly independently of your game, freeing up real headroom.',
     },
+    cpuUpgrade: {
+      cat: 'CPU with more cores',
+      desc: 'Even with a hardware encoder doing the heavy lifting, your processor still has to juggle the game, OBS, and everything else in the background — more cores means less chance of it becoming the bottleneck.',
+    },
     secondPC: {
       cat: 'A modest second PC',
       desc: 'Doesn\'t need to be powerful — just enough to run OBS and push the stream, while your main PC focuses entirely on the game.',
@@ -398,6 +402,7 @@
   const GEAR_SEARCH_QUERY = {
     captureCard: 'Elgato Game Capture Neo',
     gpuUpgrade: 'RTX 5060 Ti graphics card',
+    cpuUpgrade: 'AMD Ryzen 5 7600 processor',
     secondPC: 'mini pc for streaming',
   };
 
@@ -495,10 +500,14 @@
 
       if (tier === 'good') {
         gearKeys = [];
-      } else if (tier === 'warn') {
-        gearKeys = hasHW ? [] : ['gpuUpgrade'];
       } else {
-        gearKeys = hasHW ? ['captureCard', 'secondPC'] : ['gpuUpgrade', 'captureCard'];
+        gearKeys = [];
+        if (!hasHW) gearKeys.push('gpuUpgrade');
+        if (cores < 6) gearKeys.push('cpuUpgrade');
+        if (tier === 'bad') {
+          gearKeys.push('captureCard');
+          if (hasHW) gearKeys.push('secondPC');
+        }
       }
     }
 
