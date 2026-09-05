@@ -202,6 +202,34 @@
     These are rule-of-thumb defaults based on common OBS and platform audio guides — a good
     starting point, not a substitute for actually listening back to a test recording.
   </p>
+
+  <div class="card">
+    <h2>Why audio trips people up more than video</h2>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0 0 12px;">
+      Viewers forgive a slightly soft picture far more easily than bad audio — a mic that's too
+      quiet, clipping, or drowned out by game sound is one of the fastest ways to lose someone in
+      the first ten seconds of a stream. Unlike video, where a single bitrate number covers most of
+      what matters, audio quality comes down to several smaller decisions stacking on top of each
+      other: bitrate, how many separate tracks you're recording, and which filters are actually
+      doing something versus just eating CPU for no benefit.
+    </p>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0 0 12px;">
+      Multiple tracks matter more than most new streamers realize. OBS can record your mic, game
+      audio, and music as separate tracks even while your live stream mixes them into one — this
+      means you can mute an annoying game sound effect or duck background music in post-production
+      without having to re-record anything, as long as you set the tracks up before you start rather
+      than after. It costs nothing in real-time performance to record extra tracks; it only costs
+      you flexibility later if you don't.
+    </p>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0;">
+      On filters: a noise gate (cutting audio below a volume threshold) and noise suppression
+      (removing steady background hiss or fan noise) solve two different problems and most setups
+      benefit from having both, in that order, before a compressor which evens out volume swings
+      between quiet and loud speech. Skipping the noise gate is the single most common reason a
+      stream picks up keyboard clatter or room echo that the streamer themselves has stopped
+      noticing.
+    </p>
+  </div>
 </div>
 
 <script>

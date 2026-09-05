@@ -196,6 +196,34 @@
     your actual file sizes depend on the exact codec, container, and encoder settings you use.
     "GB" here means decimal gigabytes (1,000 MB), matching how drives are usually sold.
   </p>
+
+  <div class="card">
+    <h2>Why recordings take up so much more space than streams</h2>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0 0 12px;">
+      Recording locally and streaming to a platform use completely different bitrate budgets, which
+      is the main reason people are caught off guard by how fast a drive fills up. When you stream,
+      your bitrate is capped by both your upload speed and the platform's limits — Twitch tops out
+      at 6,000 kbps no matter what. When you record locally, none of that applies: there's no upload
+      involved, so OBS defaults to a much higher bitrate for better quality, often 2-4x what you'd
+      ever stream at. That's great for editing later, but it means an hour of 1080p60 footage at
+      "best quality" can land anywhere from 3-6GB, while the same hour at streaming-grade bitrate
+      would be under 3GB.
+    </p>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0 0 12px;">
+      The four things that actually move the needle on file size are resolution, frame rate, bitrate
+      (which the quality setting above controls), and how demanding the audio is. Going from 1080p to
+      4K roughly quadruples the raw pixel data, and 60fps versus 30fps roughly doubles it — so 4K60
+      recording can eat drive space five to ten times faster than 720p30. Audio is a much smaller
+      factor by comparison, usually only a few percent of total file size either way.
+    </p>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0;">
+      A few ways to cut storage use without touching quality much: record at "smaller files" instead
+      of "best quality" if you're not planning to do heavy editing (the difference is often hard to
+      spot on the final upload since YouTube/Twitch re-encode it anyway), record only your local
+      capture and skip a separate "backup" recording if OBS is set to do both, and clear out VODs
+      you've already exported or uploaded elsewhere rather than keeping local copies indefinitely.
+    </p>
+  </div>
 </div>
 
 <script>

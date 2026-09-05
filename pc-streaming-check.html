@@ -304,6 +304,34 @@
     real performance depends on your exact game, in-game settings, and everything else running on
     your PC. Treat it as a starting point, then watch OBS's Stats window while live to confirm.
   </p>
+
+  <div class="card">
+    <h2>What "handling" streaming actually means</h2>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0 0 12px;">
+      Streaming adds a second full-time job for your computer on top of the game: encoding video in
+      real time and sending it out over your connection. Whether your PC can do both at once without
+      the game stuttering or the stream dropping frames comes down to one core question — is
+      something other than your main CPU doing the encoding, or is the CPU splitting its attention
+      between the game and encoding at the same time?
+    </p>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0 0 12px;">
+      A modern Nvidia, AMD, or Intel GPU with a dedicated hardware encoder (NVENC, AMF, or Quick
+      Sync) handles the encoding almost entirely on its own silicon, mostly separate from whatever
+      the GPU is doing to render the game — this is why a hardware encoder makes such a large
+      practical difference. Without one, OBS falls back to software encoding (x264), which runs on
+      the same CPU cores that are also running the game, OBS's own overhead, and anything else open
+      in the background. That's the single biggest reason two PCs with similar specs can have very
+      different streaming experiences: one has a free encoder sitting on the GPU, the other is asking
+      the CPU to do everything at once.
+    </p>
+    <p style="font-size:0.88rem; line-height:1.7; margin:0;">
+      Core count matters even with a hardware encoder present, just less dramatically — the CPU still
+      has to run the game, OBS's compositing and scene switching, and background apps like Discord or
+      a browser. A CPU with only 4 cores can bottleneck even a great GPU encoder simply from being
+      asked to juggle too much at once. This is exactly why the check above weighs both your GPU's
+      encoder and your core count rather than just one or the other.
+    </p>
+  </div>
 </div>
 
 <script>
